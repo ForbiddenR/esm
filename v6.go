@@ -21,11 +21,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/cihub/seelog"
 	"io"
 	"io/ioutil"
 	"regexp"
 	"strings"
+
+	log "github.com/cihub/seelog"
 	//"infini.sh/framework/core/util"
 )
 
@@ -39,7 +40,7 @@ func (s *ESAPIV6) NewScroll(indexNames string, scrollTime string, docBufferCount
 
 	var jsonBody []byte
 	if len(query) > 0 || maxSlicedCount > 0 || len(fields) > 0 {
-		queryBody := map[string]interface{}{}
+		queryBody := map[string]any{}
 
 		if len(fields) > 0 {
 			if !strings.Contains(fields, ",") {
@@ -50,9 +51,9 @@ func (s *ESAPIV6) NewScroll(indexNames string, scrollTime string, docBufferCount
 		}
 
 		if len(query) > 0 {
-			queryBody["query"] = map[string]interface{}{}
-			queryBody["query"].(map[string]interface{})["query_string"] = map[string]interface{}{}
-			queryBody["query"].(map[string]interface{})["query_string"].(map[string]interface{})["query"] = query
+			queryBody["query"] = map[string]any{}
+			queryBody["query"].(map[string]any)["query_string"] = map[string]any{}
+			queryBody["query"].(map[string]any)["query_string"].(map[string]any)["query"] = query
 		}
 
 		if len(sort) > 0 {
@@ -63,9 +64,9 @@ func (s *ESAPIV6) NewScroll(indexNames string, scrollTime string, docBufferCount
 
 		if maxSlicedCount > 1 {
 			log.Tracef("sliced scroll, %d of %d", slicedId, maxSlicedCount)
-			queryBody["slice"] = map[string]interface{}{}
-			queryBody["slice"].(map[string]interface{})["id"] = slicedId
-			queryBody["slice"].(map[string]interface{})["max"] = maxSlicedCount
+			queryBody["slice"] = map[string]any{}
+			queryBody["slice"].(map[string]any)["id"] = slicedId
+			queryBody["slice"].(map[string]any)["max"] = maxSlicedCount
 		}
 
 		jsonBody, err = json.Marshal(queryBody)
@@ -164,8 +165,8 @@ func (s *ESAPIV6) GetIndexMappings(copyAllIndexes bool, indexNames string) (stri
 	// wrap in mappings if moving from super old es
 	for name, idx := range idxs {
 		i++
-		if _, ok := idx.(map[string]interface{})["mappings"]; !ok {
-			(idxs)[name] = map[string]interface{}{
+		if _, ok := idx.(map[string]any)["mappings"]; !ok {
+			(idxs)[name] = map[string]any{
 				"mappings": idx,
 			}
 		}
@@ -174,7 +175,7 @@ func (s *ESAPIV6) GetIndexMappings(copyAllIndexes bool, indexNames string) (stri
 	return indexNames, i, &idxs, nil
 }
 
-func (s *ESAPIV6) UpdateIndexMapping(indexName string, settings map[string]interface{}) error {
+func (s *ESAPIV6) UpdateIndexMapping(indexName string, settings map[string]any) error {
 
 	log.Debug("start update mapping: ", indexName, settings)
 

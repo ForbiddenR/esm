@@ -23,13 +23,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/cihub/seelog"
-	"github.com/parnurzeal/gorequest"
-	"github.com/valyala/fasthttp"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	log "github.com/cihub/seelog"
+	"github.com/parnurzeal/gorequest"
+	"github.com/valyala/fasthttp"
 )
 
 func BasicAuth(req *fasthttp.Request, user, pass string) {
@@ -254,10 +255,10 @@ func Request(compress bool, method string, loadUrl string, auth *Auth, body *byt
 	return string(respBody), nil
 }
 
-func DecodeJson(jsonStream string, o interface{}) error {
+func DecodeJson(jsonStream string, o any) error {
 
 	decoder := json.NewDecoder(strings.NewReader(jsonStream))
-	// UseNumber causes the Decoder to unmarshal a number into an interface{} as a Number instead of as a float64.
+	// UseNumber causes the Decoder to unmarshal a number into an any as a Number instead of as a float64.
 	decoder.UseNumber()
 	//decoder.
 
@@ -268,9 +269,9 @@ func DecodeJson(jsonStream string, o interface{}) error {
 	return nil
 }
 
-func DecodeJsonBytes(jsonStream []byte, o interface{}) error {
+func DecodeJsonBytes(jsonStream []byte, o any) error {
 	decoder := json.NewDecoder(bytes.NewReader(jsonStream))
-	// UseNumber causes the Decoder to unmarshal a number into an interface{} as a Number instead of as a float64.
+	// UseNumber causes the Decoder to unmarshal a number into an any as a Number instead of as a float64.
 	decoder.UseNumber()
 
 	if err := decoder.Decode(o); err != nil {

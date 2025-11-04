@@ -20,8 +20,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	log "github.com/cihub/seelog"
 	"strings"
+
+	log "github.com/cihub/seelog"
 )
 
 type ESAPIV5 struct {
@@ -34,7 +35,7 @@ func (s *ESAPIV5) NewScroll(indexNames string, scrollTime string, docBufferCount
 
 	var jsonBody []byte
 	if len(query) > 0 || maxSlicedCount > 0 || len(fields) > 0 {
-		queryBody := map[string]interface{}{}
+		queryBody := map[string]any{}
 
 		if len(fields) > 0 {
 			if !strings.Contains(fields, ",") {
@@ -45,9 +46,9 @@ func (s *ESAPIV5) NewScroll(indexNames string, scrollTime string, docBufferCount
 		}
 
 		if len(query) > 0 {
-			queryBody["query"] = map[string]interface{}{}
-			queryBody["query"].(map[string]interface{})["query_string"] = map[string]interface{}{}
-			queryBody["query"].(map[string]interface{})["query_string"].(map[string]interface{})["query"] = query
+			queryBody["query"] = map[string]any{}
+			queryBody["query"].(map[string]any)["query_string"] = map[string]any{}
+			queryBody["query"].(map[string]any)["query_string"].(map[string]any)["query"] = query
 		}
 
 		if len(sort) > 0 {
@@ -58,9 +59,9 @@ func (s *ESAPIV5) NewScroll(indexNames string, scrollTime string, docBufferCount
 
 		if maxSlicedCount > 1 {
 			log.Tracef("sliced scroll, %d of %d", slicedId, maxSlicedCount)
-			queryBody["slice"] = map[string]interface{}{}
-			queryBody["slice"].(map[string]interface{})["id"] = slicedId
-			queryBody["slice"].(map[string]interface{})["max"] = maxSlicedCount
+			queryBody["slice"] = map[string]any{}
+			queryBody["slice"].(map[string]any)["id"] = slicedId
+			queryBody["slice"].(map[string]any)["max"] = maxSlicedCount
 		}
 
 		jsonBody, err = json.Marshal(queryBody)

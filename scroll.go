@@ -18,6 +18,7 @@ package main
 
 import (
 	"encoding/json"
+
 	"github.com/cheggaaa/pb"
 	log "github.com/cihub/seelog"
 )
@@ -25,7 +26,7 @@ import (
 type ScrollAPI interface {
 	GetScrollId() string
 	GetHitsTotal() int
-	GetDocs() []interface{}
+	GetDocs() []any
 	ProcessScrollResult(c *Migrator, bar *pb.ProgressBar)
 	Next(c *Migrator, bar *pb.ProgressBar) (done bool)
 }
@@ -38,7 +39,7 @@ func (scroll *Scroll) GetScrollId() string {
 	return scroll.ScrollId
 }
 
-func (scroll *Scroll) GetDocs() []interface{} {
+func (scroll *Scroll) GetDocs() []any {
 	return scroll.Hits.Docs
 }
 
@@ -50,7 +51,7 @@ func (scroll *ScrollV7) GetScrollId() string {
 	return scroll.ScrollId
 }
 
-func (scroll *ScrollV7) GetDocs() []interface{} {
+func (scroll *ScrollV7) GetDocs() []any {
 	return scroll.Hits.Docs
 }
 
@@ -69,7 +70,7 @@ func (s *Scroll) ProcessScrollResult(c *Migrator, bar *pb.ProgressBar) {
 
 	// write all the docs into a channel
 	for _, docI := range s.Hits.Docs {
-		c.DocChan <- docI.(map[string]interface{})
+		c.DocChan <- docI.(map[string]any)
 	}
 }
 
@@ -110,7 +111,7 @@ func (s *ScrollV7) ProcessScrollResult(c *Migrator, bar *pb.ProgressBar) {
 
 	// write all the docs into a channel
 	for _, docI := range s.Hits.Docs {
-		c.DocChan <- docI.(map[string]interface{})
+		c.DocChan <- docI.(map[string]any)
 	}
 }
 
@@ -149,8 +150,8 @@ func (es *EmptyScroll) GetHitsTotal() int {
 	return 0
 }
 
-func (es *EmptyScroll) GetDocs() []interface{} {
-	return make([]interface{}, 0)
+func (es *EmptyScroll) GetDocs() []any {
+	return make([]any, 0)
 }
 
 func (es *EmptyScroll) ProcessScrollResult(c *Migrator, bar *pb.ProgressBar) {

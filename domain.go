@@ -33,9 +33,9 @@ type Scroll struct {
 	ScrollId string `json:"_scroll_id,omitempty"`
 	TimedOut bool   `json:"timed_out,omitempty"`
 	Hits     struct {
-		MaxScore float32       `json:"max_score,omitempty"`
-		Total    int           `json:"total,omitempty"`
-		Docs     []interface{} `json:"hits,omitempty"`
+		MaxScore float32 `json:"max_score,omitempty"`
+		Total    int     `json:"total,omitempty"`
+		Docs     []any   `json:"hits,omitempty"`
 	} `json:"hits"`
 	Shards struct {
 		Total      int `json:"total,omitempty"`
@@ -43,10 +43,10 @@ type Scroll struct {
 		Skipped    int `json:"skipped,omitempty"`
 		Failed     int `json:"failed,omitempty"`
 		Failures   []struct {
-			Shard  int         `json:"shard,omitempty"`
-			Index  string      `json:"index,omitempty"`
-			Status int         `json:"status,omitempty"`
-			Reason interface{} `json:"reason,omitempty"`
+			Shard  int    `json:"shard,omitempty"`
+			Index  string `json:"index,omitempty"`
+			Status int    `json:"status,omitempty"`
+			Reason any    `json:"reason,omitempty"`
 		} `json:"failures,omitempty"`
 	} `json:"_shards,omitempty"`
 }
@@ -85,16 +85,16 @@ type BulkResponse struct {
 }
 
 type Action struct {
-	Index  string      `json:"_index,omitempty"`
-	Type   string      `json:"_type,omitempty"`
-	Id     string      `json:"_id,omitempty"`
-	Status int         `json:"status,omitempty"`
-	Error  interface{} `json:"error,omitempty"`
+	Index  string `json:"_index,omitempty"`
+	Type   string `json:"_type,omitempty"`
+	Id     string `json:"_id,omitempty"`
+	Status int    `json:"status,omitempty"`
+	Error  any    `json:"error,omitempty"`
 }
 
 type Migrator struct {
 	FlushLock   sync.Mutex
-	DocChan     chan map[string]interface{}
+	DocChan     chan map[string]any
 	SourceESAPI ESAPI
 	TargetESAPI ESAPI
 	SourceAuth  *Auth

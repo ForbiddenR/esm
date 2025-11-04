@@ -20,13 +20,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cheggaaa/pb"
 	"io"
 	"io/ioutil"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cheggaaa/pb"
 
 	log "github.com/cihub/seelog"
 )
@@ -49,12 +50,12 @@ func (op BulkOperation) String() string {
 	}
 }
 
-func (m *Migrator) recoveryIndexSettings(sourceIndexRefreshSettings map[string]interface{}) {
+func (m *Migrator) recoveryIndexSettings(sourceIndexRefreshSettings map[string]any) {
 	//update replica and refresh_interval
 	for name, interval := range sourceIndexRefreshSettings {
 		tempIndexSettings := getEmptyIndexSettings()
-		tempIndexSettings["settings"].(map[string]interface{})["index"].(map[string]interface{})["refresh_interval"] = interval
-		//tempIndexSettings["settings"].(map[string]interface{})["index"].(map[string]interface{})["number_of_replicas"] = 1
+		tempIndexSettings["settings"].(map[string]any)["index"].(map[string]any)["refresh_interval"] = interval
+		//tempIndexSettings["settings"].(map[string]any)["index"].(map[string]any)["number_of_replicas"] = 1
 		m.TargetESAPI.UpdateIndexSettings(name, tempIndexSettings)
 		if m.Config.Refresh {
 			m.TargetESAPI.Refresh(name)
@@ -329,7 +330,7 @@ WORKER_DONE:
 	wg.Done()
 }
 
-func (m *Migrator) bulkRecords(bulkOp BulkOperation, dstEsApi ESAPI, targetIndex string, targetType string, diffDocMaps map[string]interface{}) error {
+func (m *Migrator) bulkRecords(bulkOp BulkOperation, dstEsApi ESAPI, targetIndex string, targetType string, diffDocMaps map[string]any) error {
 	//var err error
 	docCount := 0
 	bulkItemSize := 0
@@ -341,7 +342,7 @@ func (m *Migrator) bulkRecords(bulkOp BulkOperation, dstEsApi ESAPI, targetIndex
 	//var tempTargetTypeName string
 
 	for docId, docData := range diffDocMaps {
-		docI := docData.(map[string]interface{})
+		docI := docData.(map[string]any)
 		log.Debugf("now will bulk %s docId=%s, docData=%+v", bulkOp, docId, docData)
 		//tempDestIndexName = docI["_index"].(string)
 		//tempTargetTypeName = docI["_type"].(string)
@@ -354,7 +355,7 @@ func (m *Migrator) bulkRecords(bulkOp BulkOperation, dstEsApi ESAPI, targetIndex
 
 		switch bulkOp {
 		case opIndex:
-			doc.Source = docI // docI["_source"].(map[string]interface{}),
+			doc.Source = docI // docI["_source"].(map[string]any),
 			strOperation = "index"
 		case opDelete:
 			strOperation = "delete"
@@ -386,9 +387,9 @@ func (m *Migrator) bulkRecords(bulkOp BulkOperation, dstEsApi ESAPI, targetIndex
 
 func (m *Migrator) SyncBetweenIndex(srcEsApi ESAPI, dstEsApi ESAPI, cfg *Config) {
 	// _id => value
-	srcDocMaps := make(map[string]interface{})
-	dstDocMaps := make(map[string]interface{})
-	diffDocMaps := make(map[string]interface{})
+	srcDocMaps := make(map[string]any)
+	dstDocMaps := make(map[string]any)
+	diffDocMaps := make(map[string]any)
 
 	srcRecordIndex := 0
 	dstRecordIndex := 0
@@ -450,8 +451,8 @@ func (m *Migrator) SyncBetweenIndex(srcEsApi ESAPI, dstEsApi ESAPI, cfg *Config)
 		//从目标 index 中查询,并放入 destMap, 如果没有则是空
 		if needScrollDest {
 			for idx, dstDocI := range dstScroll.GetDocs() {
-				destId := dstDocI.(map[string]interface{})["_id"].(string)
-				dstSource := dstDocI.(map[string]interface{})["_source"]
+				destId := dstDocI.(map[string]any)["_id"].(string)
+				dstSource := dstDocI.(map[string]any)["_source"]
 				lastDestId = destId
 				log.Debugf("dst [%d]: dstId=%s", dstRecordIndex+idx, destId)
 
@@ -477,9 +478,9 @@ func (m *Migrator) SyncBetweenIndex(srcEsApi ESAPI, dstEsApi ESAPI, cfg *Config)
 		//先将 src 的当前批次查出并放入 map
 		if needScrollSrc {
 			for idx, srcDocI := range srcScroll.GetDocs() {
-				srcId := srcDocI.(map[string]interface{})["_id"].(string)
-				srcSource := srcDocI.(map[string]interface{})["_source"]
-				srcType = srcDocI.(map[string]interface{})["_type"].(string)
+				srcId := srcDocI.(map[string]any)["_id"].(string)
+				srcSource := srcDocI.(map[string]any)["_source"]
+				srcType = srcDocI.(map[string]any)["_type"].(string)
 				lastSrcId = srcId
 				log.Debugf("src [%d]: srcId=%s", srcRecordIndex+idx, srcId)
 
@@ -513,7 +514,7 @@ func (m *Migrator) SyncBetweenIndex(srcEsApi ESAPI, dstEsApi ESAPI, cfg *Config)
 		if len(diffDocMaps) > 0 {
 			log.Debugf("now will bulk index %d records", len(diffDocMaps))
 			_ = Verify(m.bulkRecords(opIndex, dstEsApi, cfg.TargetIndexName, srcType, diffDocMaps))
-			diffDocMaps = make(map[string]interface{})
+			diffDocMaps = make(map[string]any)
 		}
 
 		if lastSrcId == lastDestId {
@@ -567,9 +568,9 @@ func (m *Migrator) SyncBetweenIndex(srcEsApi ESAPI, dstEsApi ESAPI, cfg *Config)
 	//dstBar.FinishPrint("Dest End")
 	//pool.Stop()
 
-        log.Infof("sync %s(%d) to %s(%d), add=%d, update=%d, delete=%d",
-                cfg.SourceIndexNames, srcRecordIndex, cfg.TargetIndexName, dstRecordIndex,
-                addCount, updateCount, deleteCount)
+	log.Infof("sync %s(%d) to %s(%d), add=%d, update=%d, delete=%d",
+		cfg.SourceIndexNames, srcRecordIndex, cfg.TargetIndexName, dstRecordIndex,
+		addCount, updateCount, deleteCount)
 
 	//log.Infof("diffDocMaps=%+v", diffDocMaps)
 }

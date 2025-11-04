@@ -2,10 +2,6 @@ package main
 
 import (
 	"bufio"
-	"github.com/cheggaaa/pb"
-	log "github.com/cihub/seelog"
-	goflags "github.com/jessevdk/go-flags"
-	"github.com/mattn/go-isatty"
 	"io"
 	"net/http"
 	_ "net/http/pprof"
@@ -15,6 +11,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cheggaaa/pb"
+	log "github.com/cihub/seelog"
+	goflags "github.com/jessevdk/go-flags"
+	"github.com/mattn/go-isatty"
 )
 
 func main() {
@@ -109,7 +110,7 @@ func main() {
 			}
 
 			// enough of a buffer to hold all the search results across all workers
-			migrator.DocChan = make(chan map[string]interface{}, c.BufferCount)
+			migrator.DocChan = make(chan map[string]any, c.BufferCount)
 
 			//var srcESVersion *ClusterVersion
 			// create a progressbar and start a docCount
@@ -284,7 +285,7 @@ func main() {
 						return
 					}
 
-					sourceIndexRefreshSettings := map[string]interface{}{}
+					sourceIndexRefreshSettings := map[string]any{}
 
 					log.Debugf("indexCount: %d", indexCount)
 
@@ -332,7 +333,7 @@ func main() {
 									//if target es have this index and we dont copy index settings
 									if val, ok := (*targetIndexSettings)[name]; ok {
 										targetIndexExist = true
-										tempIndexSettings = val.(map[string]interface{})
+										tempIndexSettings = val.(map[string]any)
 									}
 
 									if c.RecreateIndex {
@@ -343,33 +344,33 @@ func main() {
 
 								//copy index settings
 								if c.CopyIndexSettings {
-									tempIndexSettings = ((*sourceIndexSettings)[name]).(map[string]interface{})
+									tempIndexSettings = ((*sourceIndexSettings)[name]).(map[string]any)
 								}
 
 								//check map elements
 								if _, ok := tempIndexSettings["settings"]; !ok {
-									tempIndexSettings["settings"] = map[string]interface{}{}
+									tempIndexSettings["settings"] = map[string]any{}
 								}
 
-								if _, ok := tempIndexSettings["settings"].(map[string]interface{})["index"]; !ok {
-									tempIndexSettings["settings"].(map[string]interface{})["index"] = map[string]interface{}{}
+								if _, ok := tempIndexSettings["settings"].(map[string]any)["index"]; !ok {
+									tempIndexSettings["settings"].(map[string]any)["index"] = map[string]any{}
 								}
 
-								sourceIndexRefreshSettings[name] = ((*sourceIndexSettings)[name].(map[string]interface{}))["settings"].(map[string]interface{})["index"].(map[string]interface{})["refresh_interval"]
+								sourceIndexRefreshSettings[name] = ((*sourceIndexSettings)[name].(map[string]any))["settings"].(map[string]any)["index"].(map[string]any)["refresh_interval"]
 
 								//set refresh_interval
-								tempIndexSettings["settings"].(map[string]interface{})["index"].(map[string]interface{})["refresh_interval"] = -1
-								tempIndexSettings["settings"].(map[string]interface{})["index"].(map[string]interface{})["number_of_replicas"] = 0
+								tempIndexSettings["settings"].(map[string]any)["index"].(map[string]any)["refresh_interval"] = -1
+								tempIndexSettings["settings"].(map[string]any)["index"].(map[string]any)["number_of_replicas"] = 0
 
 								//clean up settings
-								delete(tempIndexSettings["settings"].(map[string]interface{})["index"].(map[string]interface{}), "number_of_shards")
+								delete(tempIndexSettings["settings"].(map[string]any)["index"].(map[string]any), "number_of_shards")
 
 								//copy indexsettings and mappings
 								if targetIndexExist {
 									log.Debug("update index with settings,", name, tempIndexSettings)
 									//override shard settings
 									if c.ShardsCount > 0 {
-										tempIndexSettings["settings"].(map[string]interface{})["index"].(map[string]interface{})["number_of_shards"] = c.ShardsCount
+										tempIndexSettings["settings"].(map[string]any)["index"].(map[string]any)["number_of_shards"] = c.ShardsCount
 									}
 									err := migrator.TargetESAPI.UpdateIndexSettings(name, tempIndexSettings)
 									if err != nil {
@@ -379,7 +380,7 @@ func main() {
 
 									//override shard settings
 									if c.ShardsCount > 0 {
-										tempIndexSettings["settings"].(map[string]interface{})["index"].(map[string]interface{})["number_of_shards"] = c.ShardsCount
+										tempIndexSettings["settings"].(map[string]any)["index"].(map[string]any)["number_of_shards"] = c.ShardsCount
 									}
 
 									log.Debug("create index with settings,", name, tempIndexSettings)
@@ -403,7 +404,7 @@ func main() {
 								}
 
 								for name, mapping := range *sourceIndexMappings {
-									err := migrator.TargetESAPI.UpdateIndexMapping(name, mapping.(map[string]interface{})["mappings"].(map[string]interface{}))
+									err := migrator.TargetESAPI.UpdateIndexMapping(name, mapping.(map[string]any)["mappings"].(map[string]any))
 									if err != nil {
 										log.Error(err)
 									}

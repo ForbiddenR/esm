@@ -24,10 +24,10 @@ type ESAPI interface {
 	Bulk(data *bytes.Buffer) error
 	GetIndexSettings(indexNames string) (*Indexes, error)
 	DeleteIndex(name string) error
-	CreateIndex(name string, settings map[string]interface{}) error
+	CreateIndex(name string, settings map[string]any) error
 	GetIndexMappings(copyAllIndexes bool, indexNames string) (string, int, *Indexes, error)
-	UpdateIndexSettings(indexName string, settings map[string]interface{}) error
-	UpdateIndexMapping(indexName string, mappings map[string]interface{}) error
+	UpdateIndexSettings(indexName string, settings map[string]any) error
+	UpdateIndexMapping(indexName string, mappings map[string]any) error
 	NewScroll(indexNames string, scrollTime string, docBufferCount int, query string, sort string,
 		slicedId int, maxSlicedCount int, fields string) (ScrollAPI, error)
 	NextScroll(scrollTime string, scrollId string) (ScrollAPI, error)

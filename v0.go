@@ -21,11 +21,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/cihub/seelog"
 	"io"
 	"io/ioutil"
 	"regexp"
 	"strings"
+
+	log "github.com/cihub/seelog"
 )
 
 type ESAPIV0 struct {
@@ -195,8 +196,8 @@ func (s *ESAPIV0) GetIndexMappings(copyAllIndexes bool, indexNames string) (stri
 	// wrap in mappings if moving from super old es
 	for name, idx := range idxs {
 		i++
-		if _, ok := idx.(map[string]interface{})["mappings"]; !ok {
-			(idxs)[name] = map[string]interface{}{
+		if _, ok := idx.(map[string]any)["mappings"]; !ok {
+			(idxs)[name] = map[string]any{
 				"mappings": idx,
 			}
 		}
@@ -205,32 +206,32 @@ func (s *ESAPIV0) GetIndexMappings(copyAllIndexes bool, indexNames string) (stri
 	return indexNames, i, &idxs, nil
 }
 
-func getEmptyIndexSettings() map[string]interface{} {
-	tempIndexSettings := map[string]interface{}{}
-	tempIndexSettings["settings"] = map[string]interface{}{}
-	tempIndexSettings["settings"].(map[string]interface{})["index"] = map[string]interface{}{}
+func getEmptyIndexSettings() map[string]any {
+	tempIndexSettings := map[string]any{}
+	tempIndexSettings["settings"] = map[string]any{}
+	tempIndexSettings["settings"].(map[string]any)["index"] = map[string]any{}
 	return tempIndexSettings
 }
 
-func cleanSettings(settings map[string]interface{}) {
+func cleanSettings(settings map[string]any) {
 	//clean up settings
-	delete(settings["settings"].(map[string]interface{})["index"].(map[string]interface{}), "creation_date")
-	delete(settings["settings"].(map[string]interface{})["index"].(map[string]interface{}), "uuid")
-	delete(settings["settings"].(map[string]interface{})["index"].(map[string]interface{}), "version")
-	delete(settings["settings"].(map[string]interface{})["index"].(map[string]interface{}), "provided_name")
+	delete(settings["settings"].(map[string]any)["index"].(map[string]any), "creation_date")
+	delete(settings["settings"].(map[string]any)["index"].(map[string]any), "uuid")
+	delete(settings["settings"].(map[string]any)["index"].(map[string]any), "version")
+	delete(settings["settings"].(map[string]any)["index"].(map[string]any), "provided_name")
 }
 
-func (s *ESAPIV0) UpdateIndexSettings(name string, settings map[string]interface{}) error {
+func (s *ESAPIV0) UpdateIndexSettings(name string, settings map[string]any) error {
 
 	log.Debug("update index: ", name, settings)
 	cleanSettings(settings)
 	url := fmt.Sprintf("%s/%s/_settings", s.Host, name)
 
-	if _, ok := settings["settings"].(map[string]interface{})["index"]; ok {
-		if set, ok := settings["settings"].(map[string]interface{})["index"].(map[string]interface{})["analysis"]; ok {
+	if _, ok := settings["settings"].(map[string]any)["index"]; ok {
+		if set, ok := settings["settings"].(map[string]any)["index"].(map[string]any)["analysis"]; ok {
 			log.Debug("update static index settings: ", name)
 			staticIndexSettings := getEmptyIndexSettings()
-			staticIndexSettings["settings"].(map[string]interface{})["index"].(map[string]interface{})["analysis"] = set
+			staticIndexSettings["settings"].(map[string]any)["index"].(map[string]any)["analysis"] = set
 			Request(false, "POST", fmt.Sprintf("%s/%s/_close", s.Host, name), s.Auth, nil, s.HttpProxy)
 			//Post(fmt.Sprintf("%s/%s/_close", s.Host, name), s.Auth, "", s.HttpProxy)
 			body := bytes.Buffer{}
@@ -241,7 +242,7 @@ func (s *ESAPIV0) UpdateIndexSettings(name string, settings map[string]interface
 				log.Error(bodyStr, err)
 				panic(err)
 			}
-			delete(settings["settings"].(map[string]interface{})["index"].(map[string]interface{}), "analysis")
+			delete(settings["settings"].(map[string]any)["index"].(map[string]any), "analysis")
 			Request(false, "POST", fmt.Sprintf("%s/%s/_open", s.Host, name), s.Auth, nil, s.HttpProxy)
 			//Post(fmt.Sprintf("%s/%s/_open", s.Host, name), s.Auth, "", s.HttpProxy)
 		}
@@ -257,7 +258,7 @@ func (s *ESAPIV0) UpdateIndexSettings(name string, settings map[string]interface
 	return err
 }
 
-func (s *ESAPIV0) UpdateIndexMapping(indexName string, settings map[string]interface{}) error {
+func (s *ESAPIV0) UpdateIndexMapping(indexName string, settings map[string]any) error {
 
 	log.Debug("start update mapping: ", indexName, settings)
 
@@ -294,7 +295,7 @@ func (s *ESAPIV0) DeleteIndex(name string) (err error) {
 	return nil
 }
 
-func (s *ESAPIV0) CreateIndex(name string, settings map[string]interface{}) (err error) {
+func (s *ESAPIV0) CreateIndex(name string, settings map[string]any) (err error) {
 	cleanSettings(settings)
 
 	body := bytes.Buffer{}
@@ -335,7 +336,7 @@ func (s *ESAPIV0) NewScroll(indexNames string, scrollTime string, docBufferCount
 
 	var jsonBody []byte
 	if len(query) > 0 || len(fields) > 0 {
-		queryBody := map[string]interface{}{}
+		queryBody := map[string]any{}
 		if len(fields) > 0 {
 			if !strings.Contains(fields, ",") {
 				queryBody["_source"] = fields
@@ -345,9 +346,9 @@ func (s *ESAPIV0) NewScroll(indexNames string, scrollTime string, docBufferCount
 		}
 
 		if len(query) > 0 {
-			queryBody["query"] = map[string]interface{}{}
-			queryBody["query"].(map[string]interface{})["query_string"] = map[string]interface{}{}
-			queryBody["query"].(map[string]interface{})["query_string"].(map[string]interface{})["query"] = query
+			queryBody["query"] = map[string]any{}
+			queryBody["query"].(map[string]any)["query_string"] = map[string]any{}
+			queryBody["query"].(map[string]any)["query_string"].(map[string]any)["query"] = query
 		}
 
 		if len(sort) > 0 {

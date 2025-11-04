@@ -91,7 +91,7 @@ package main
 //					log.Fatal(err)
 //				}
 //
-//				var arr []map[string]interface{}
+//				var arr []map[string]any
 //				_ = DecodeJson(string(b), &arr)
 //
 //
@@ -105,7 +105,7 @@ package main
 //
 //					for i,v:=range arr{
 //						//text:="{\"a\":\"123123\"}"
-//						obj:=map[string]interface{}{}
+//						obj:=map[string]any{}
 //						//obj["level"]=c.TestLevel
 //						//obj["environment"]=c.TestEnvironment
 //						obj["i"]=i
