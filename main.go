@@ -153,8 +153,8 @@ func main() {
 							return
 						}
 
+						wg.Add(1)
 						go func() {
-							wg.Add(1)
 							//process input
 							// start scroll
 							scroll.ProcessScrollResult(&migrator, fetchBar)

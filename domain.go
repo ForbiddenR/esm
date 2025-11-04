@@ -18,14 +18,14 @@ package main
 
 import "sync"
 
-type Indexes map[string]interface{}
+type Indexes map[string]any
 
 type Document struct {
-	Index   string                 `json:"_index,omitempty"`
-	Type    string                 `json:"_type,omitempty"`
-	Id      string                 `json:"_id,omitempty"`
-	source  map[string]interface{} `json:"_source,omitempty"`
-	Routing string                 `json:"routing,omitempty"` //after 6, only `routing` was supported
+	Index   string         `json:"_index,omitempty"`
+	Type    string         `json:"_type,omitempty"`
+	Id      string         `json:"_id,omitempty"`
+	Source  map[string]any `json:"_source,omitempty"`
+	Routing string         `json:"routing,omitempty"` //after 6, only `routing` was supported
 }
 
 type Scroll struct {
@@ -58,8 +58,8 @@ type ScrollV7 struct {
 		Total    struct {
 			Value    int    `json:"value,omitempty"`
 			Relation string `json:"relation,omitempty"`
-		} `json:"total,omitempty"`
-		Docs []interface{} `json:"hits,omitempty"`
+		} `json:"total"`
+		Docs []any `json:"hits,omitempty"`
 	} `json:"hits"`
 }
 

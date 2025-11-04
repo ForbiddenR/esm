@@ -82,7 +82,7 @@ func (s *Scroll) Next(c *Migrator, bar *pb.ProgressBar) (done bool) {
 	}
 
 	docs := scroll.GetDocs()
-	if docs == nil || len(docs) <= 0 {
+	if len(docs) <= 0 {
 		log.Debug("scroll result is empty")
 		return true
 	}
@@ -123,7 +123,7 @@ func (s *ScrollV7) Next(c *Migrator, bar *pb.ProgressBar) (done bool) {
 	}
 
 	docs := scroll.GetDocs()
-	if docs == nil || len(docs) <= 0 {
+	if len(docs) <= 0 {
 		log.Debug("scroll result is empty")
 		return true
 	}

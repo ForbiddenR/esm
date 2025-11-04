@@ -120,7 +120,6 @@ func (s *ESAPIV0) GetIndexSettings(indexNames string) (*Indexes, error) {
 	err := json.Unmarshal([]byte(body), allSettings)
 	if err != nil {
 		panic(err)
-		return nil, err
 	}
 
 	return allSettings, nil
@@ -241,7 +240,6 @@ func (s *ESAPIV0) UpdateIndexSettings(name string, settings map[string]interface
 			if err != nil {
 				log.Error(bodyStr, err)
 				panic(err)
-				return err
 			}
 			delete(settings["settings"].(map[string]interface{})["index"].(map[string]interface{}), "analysis")
 			Request(false, "POST", fmt.Sprintf("%s/%s/_open", s.Host, name), s.Auth, nil, s.HttpProxy)

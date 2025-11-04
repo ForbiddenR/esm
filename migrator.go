@@ -232,7 +232,7 @@ READ_DOCS:
 			doc := Document{
 				Index:  tempDestIndexName,
 				Type:   tempTargetTypeName,
-				source: docI["_source"].(map[string]interface{}),
+				Source: docI["_source"].(map[string]any),
 				Id:     docI["_id"].(string),
 			}
 
@@ -247,11 +247,11 @@ READ_DOCS:
 					oldField := strings.TrimSpace(fvs[0])
 					newField := strings.TrimSpace(fvs[1])
 					if oldField == "_type" {
-						doc.source[newField] = docI["_type"].(string)
+						doc.Source[newField] = docI["_type"].(string)
 					} else {
-						v := doc.source[oldField]
-						doc.source[newField] = v
-						delete(doc.source, oldField)
+						v := doc.Source[oldField]
+						doc.Source[newField] = v
+						delete(doc.Source, oldField)
 					}
 				}
 			}
@@ -282,7 +282,7 @@ READ_DOCS:
 			if err = docEnc.Encode(post); err != nil {
 				log.Error(err)
 			}
-			if err = docEnc.Encode(doc.source); err != nil {
+			if err = docEnc.Encode(doc.Source); err != nil {
 				log.Error(err)
 			}
 
@@ -354,7 +354,7 @@ func (m *Migrator) bulkRecords(bulkOp BulkOperation, dstEsApi ESAPI, targetIndex
 
 		switch bulkOp {
 		case opIndex:
-			doc.source = docI // docI["_source"].(map[string]interface{}),
+			doc.Source = docI // docI["_source"].(map[string]interface{}),
 			strOperation = "index"
 		case opDelete:
 			strOperation = "delete"
@@ -368,7 +368,7 @@ func (m *Migrator) bulkRecords(bulkOp BulkOperation, dstEsApi ESAPI, targetIndex
 		}
 		_ = Verify(docEnc.Encode(post))
 		if bulkOp == opIndex {
-			_ = Verify(docEnc.Encode(doc.source))
+			_ = Verify(docEnc.Encode(doc.Source))
 		}
 		// append the doc to the main buffer
 		mainBuf.Write(docBuf.Bytes())

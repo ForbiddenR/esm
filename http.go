@@ -246,11 +246,11 @@ func Request(compress bool, method string, loadUrl string, auth *Auth, body *byt
 		return string(respBody), err
 	}
 
+	_, err = io.Copy(io.Discard, resp.Body)
+	defer resp.Body.Close()
 	if err != nil {
 		return string(respBody), err
 	}
-	io.Copy(io.Discard, resp.Body)
-	defer resp.Body.Close()
 	return string(respBody), nil
 }
 

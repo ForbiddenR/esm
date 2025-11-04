@@ -52,7 +52,7 @@ func (m *Migrator) NewFileReadWorker(pb *pb.ProgressBar, wg *sync.WaitGroup) {
 			break
 		}
 		lineCount += 1
-		js := map[string]interface{}{}
+		js := map[string]any{}
 
 		err = DecodeJson(line, &js)
 		if err != nil {
@@ -126,9 +126,7 @@ READ_DOCS:
 			}
 		}
 		for _, key := range skipFields {
-			if _, found := docI[key]; found {
-				delete(docI, key)
-			}
+			delete(docI, key)
 		}
 
 		jsr, err := json.Marshal(docI)
